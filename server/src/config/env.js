@@ -6,7 +6,7 @@ dotenv.config();
 // Variables the app cannot run without
 const requiredVars = ["MONGO_URI"];
 
-for (const name of requiredVars) {
+for (const name of requiredVars) {    
   if (!process.env[name] || process.env[name].trim() === "") {
     throw new Error(`Missing required environment variable: ${name}`);
   }
