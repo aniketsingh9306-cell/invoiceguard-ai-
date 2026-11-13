@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const bcrypt= require("bcrypt");
 
 const userSchema = new mongoose.Schema(
   {
@@ -30,6 +31,18 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+userSchema.pre("save", async function () {
+  // If the password was not changed, do nothing (avoids hashing a hash)
+  if (!this.isModified("password")) return;
+
+  this.password = await bcrypt.hash(this.password, 10);
+});
+
+// Used at login: compares the typed password with the stored hash
+userSchema.methods.comparePassword = function (typedPassword) {
+  return bcrypt.compare(typedPassword, this.password);
+};
 
 const User = mongoose.model("User", userSchema);
 
