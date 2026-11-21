@@ -1,4 +1,7 @@
+const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const AppError = require("../utils/AppError");
+const env = require("../config/env");
 
 const register = async (req, res) => {
   const { name, email, password } = req.body || {};
@@ -16,5 +19,33 @@ const register = async (req, res) => {
     },
   });
 };
+const login = async (req, res) => {
+  const { email, password } = req.body || {};
 
-module.exports = { register };
+  if (typeof email !== "string" || typeof password !== "string" || !email || !password) {
+    throw new AppError("Email and password are required", 400);
+  }
+
+  const user = await User.findOne({ email: email.toLowerCase().trim() }).select("+password");
+
+  if (!user || !(await user.comparePassword(password))) {
+    throw new AppError("Invalid email or password", 401);
+  }
+const token = jwt.sign({ id: user._id }, env.jwtSecret, {
+    expiresIn: env.jwtExpiresIn,
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Login successful",
+    token,
+    user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    },
+  });
+};
+
+module.exports = { register ,login }; 
