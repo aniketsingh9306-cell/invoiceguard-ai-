@@ -47,5 +47,17 @@ const token = jwt.sign({ id: user._id }, env.jwtSecret, {
     },
   });
 };
+const getMe = (req, res) => {
+  res.status(200).json({
+    success: true,
+    user: {
+      id: req.user._id,
+      name: req.user.name,
+      email: req.user.email,
+      role: req.user.role,
+    },
+  });
+};
 
-module.exports = { register ,login }; 
+module.exports = { register, login, getMe };
+

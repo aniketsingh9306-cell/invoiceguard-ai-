@@ -10,16 +10,22 @@ const normalizeError = (err) => {
     return new AppError("Invalid JSON in request body", 400);
   }
 
-  
   if (err.name === "ValidationError") {
     const messages = Object.values(err.errors).map((e) => e.message);
     return new AppError(messages.join(". "), 400);
   }
 
-  
   if (err.code === 11000) {
     const field = Object.keys(err.keyPattern || {})[0] || "value";
     return new AppError(`${field} is already registered`, 409);
+  }
+
+  if (err.name === "TokenExpiredError") {
+    return new AppError("Your session has expired. Please log in again", 401);
+  }
+
+  if (err.name === "JsonWebTokenError") {
+    return new AppError("Invalid token. Please log in again", 401);
   }
 
   return err;
